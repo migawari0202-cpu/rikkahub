@@ -453,7 +453,7 @@ fun ChatDrawerContent(
 
                 DrawerAction(
                     icon = {
-                        Icon(HugeIcons.Settings03, null)
+                        Icon(HugeIcons.Settings03, stringResource(R.string.settings))
                     },
                     label = { Text(stringResource(R.string.settings)) },
                     onClick = {
@@ -853,7 +853,7 @@ private fun MemoryDreamingEntry(onClick: () -> Unit) {
 }
 
 @Composable
-private fun DrawerAction(
+internal fun DrawerAction(
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
     label: @Composable () -> Unit,
@@ -862,7 +862,7 @@ private fun DrawerAction(
     Surface(
         onClick = onClick,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shape = CircleShape,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
@@ -873,8 +873,8 @@ private fun DrawerAction(
         ) {
             Box(
                 modifier = Modifier
-                    .padding(10.dp)
-                    .size(20.dp),
+                    .padding(8.dp)
+                    .size(24.dp),
             ) {
                 icon()
             }

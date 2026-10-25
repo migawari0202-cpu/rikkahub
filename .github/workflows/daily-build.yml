@@ -92,12 +92,27 @@ jobs:
 
           # Write Google Services config safely and validate before Gradle runs.
           if [ -z "${GOOGLE_SERVICES_JSON:-}" ]; then
-            echo "::error::GOOGLE_SERVICES_JSON secret is empty. Set it to the raw google-services.json contents."
+            echo "::error::GOOGLE_SERVICES_JSON secret is empty. Store the complete google-services.json contents as the secret."
             exit 1
           fi
-          printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
-          if ! jq -e 'type == "object"' app/google-services.json >/dev/null 2>&1; then
-            echo "::error::GOOGLE_SERVICES_JSON is not valid JSON. Set the secret to the complete raw google-services.json file contents."
+
+          # Accept either raw JSON or Base64-encoded JSON without exposing the secret in the log.
+          if printf '%s' "$GOOGLE_SERVICES_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
+          elif printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode 2>/dev/null | jq -e 'type == "object"' >/dev/null 2>&1; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+          else
+            echo "::error::GOOGLE_SERVICES_JSON must be a JSON object or Base64 of a JSON object. Check the secret value and remove surrounding quotes."
+            exit 1
+          fi
+
+          if ! jq -e '.client | type == "array" and length > 0' app/google-services.json >/dev/null 2>&1; then
+            echo "::error::GOOGLE_SERVICES_JSON is valid JSON but has no Firebase clients. Use the complete Firebase Android configuration."
+            exit 1
+          fi
+
+          if ! jq -e '.client | any(.[]; .client_info.android_client_info.package_name == "me.rerere.rikkahub" or .client_info.android_client_info.package_name == "me.rerere.rikkahub.debug")' app/google-services.json >/dev/null 2>&1; then
+            echo "::error::GOOGLE_SERVICES_JSON has no Android client for me.rerere.rikkahub (or its .debug test variant)."
             exit 1
           fi
 

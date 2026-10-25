@@ -18,6 +18,12 @@ the original RikkaHub developers.**
 
 ---
 
+## Changes from Upstream
+
+Changes resulting from pulling from the upstream repository are not recorded.
+See [CHANGELOG.md](CHANGELOG.md) for a record of this fork's changes.
+(small wait sorry)
+
 
 
 <div align="center">
@@ -100,11 +106,11 @@ Technology stack documentation:
 
 > [!TIP]
 > You need a `google-services.json` file at `app` folder to build the app.
+> 
+### 💖 Support the Original Creator (本家様へのご支援)
 
-## 💰 Donate
-
-* [Ko-fi](https://ko-fi.com/reovodev)
-* [爱发电](https://afdian.com/a/reovo)
+- [Ko-fi](https://ko-fi.com/reovodev)
+- [爱发电](https://afdian.com/a/reovo)
 
 ## ⭐ Star History
 

@@ -46,6 +46,10 @@ Click to join our Discord server 👉 [【RikkaHub】](https://discord.gg/9weBqx
 
 ## 🚀 Download
 
+> [!NOTE]
+> This README includes the official RikkaHub download links only as reference/compatibility information for the upstream project.
+> This repository is an unofficial fork and is not the official distribution channel.
+
 🔗 [Download from Website](https://rikka-ai.com/download) (Recommended)
 
 🔗 [Download from Google Play](https://play.google.com/store/apps/details?id=me.rerere.rikkahub)

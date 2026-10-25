@@ -44,7 +44,10 @@ test('409 creates a conflict queue and completes normally', async () => {
   await sync(f);
   const issue = f.calls.find(c => c.name === 'create').args;
   assert.match(issue.body, /abc123/);
-  assert.match(issue.body, /git merge FETCH_HEAD/);
+  assert.match(issue.body, /git merge --no-ff FETCH_HEAD/);
+  assert.match(issue.body, /SHA・Author・Committer/);
+  assert.match(issue.body, /Squash and merge \/ Rebase and merge \/ cherry-pick は使用しない/);
+  assert.match(issue.body, /git merge-base --is-ancestor/);
   assert.equal(f.calls.filter(c => c.name === 'merge').length, 1);
 });
 
@@ -93,5 +96,49 @@ test('wrong parent and disabled Issues are rejected before merging', async () =>
     const f = fixture(options);
     await assert.rejects(sync(f));
     assert.equal(f.calls.some(c => c.name === 'merge'), false);
+  }
+});
+
+test('normal conflict-resolution merge preserves upstream commit identity and ancestry', () => {
+  const { execFileSync, spawnSync } = require('node:child_process');
+  const { mkdtempSync, writeFileSync, rmSync } = require('node:fs');
+  const { tmpdir } = require('node:os');
+  const { join } = require('node:path');
+  const cwd = mkdtempSync(join(tmpdir(), 'rikkahub-sync-test-'));
+  const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: join(cwd, 'no-global-config') };
+  for (const key of ['GIT_AUTHOR_NAME', 'GIT_AUTHOR_EMAIL', 'GIT_COMMITTER_NAME', 'GIT_COMMITTER_EMAIL']) {
+    delete env[key];
+  }
+  const git = (...args) => execFileSync('git', args, { cwd, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const write = text => writeFileSync(join(cwd, 'shared.txt'), text);
+  try {
+    git('init', '--initial-branch=master');
+    git('config', 'user.name', 'Original Author');
+    git('config', 'user.email', 'original@example.invalid');
+    write('base\n');
+    git('add', 'shared.txt');
+    git('commit', '-m', 'base');
+    git('checkout', '-b', 'upstream');
+    write('upstream change\n');
+    git('commit', '-am', 'upstream change');
+    const sha = git('rev-parse', 'HEAD');
+    const identity = git('show', '-s', '--format=%H %an %ae %cn %ce', sha);
+    git('checkout', 'master');
+    git('config', 'user.name', 'Resolution Bot');
+    git('config', 'user.email', 'bot@example.invalid');
+    write('fork change\n');
+    git('commit', '-am', 'fork change');
+    const merge = spawnSync('git', ['merge', '--no-ff', 'upstream'], { cwd, env, encoding: 'utf8' });
+    assert.equal(merge.status, 1);
+    assert.equal(git('diff', '--name-only', '--diff-filter=U'), 'shared.txt');
+    write('upstream change\nfork change\n');
+    git('add', 'shared.txt');
+    git('commit', '-m', 'resolve conflict, retaining both histories');
+    assert.equal(git('rev-parse', 'HEAD^2'), sha);
+    assert.equal(git('show', '-s', '--format=%H %an %ae %cn %ce', sha), identity);
+    git('merge-base', '--is-ancestor', sha, 'master');
+    assert.equal(git('show', '-s', '--format=%an <%ae>', 'HEAD'), 'Resolution Bot <bot@example.invalid>');
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
   }
 });

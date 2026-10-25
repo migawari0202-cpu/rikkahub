@@ -46,9 +46,16 @@ module.exports = async function sync({ github, context, core }) {
       '### 解決手順',
       '1. 最新の master から作業ブランチを作成します。',
       `2. git fetch https://github.com/${upstream}.git ${branch} を実行します。`,
-      '3. git merge FETCH_HEAD を実行し、競合を修正してコミットします。',
-      '4. テスト後、その作業ブランチをこのフォークの master にマージします（本家への PR は不要です）。',
+      '3. git merge --no-ff FETCH_HEAD を実行し、競合を修正してマージコミットを作成します。',
+      '4. テスト後、その作業ブランチをこのフォークの master に通常のマージで取り込みます（本家への PR は不要です）。',
       '5. 次の同期成功時にこの Issue は自動で閉じられます。手動実行でも再試行できます。',
+      '',
+      '### 本家の作者名義を保持すること',
+      '- 本家の元コミットは SHA・Author・Committer を変更せず、master の祖先として残してください。',
+      '- Squash and merge / Rebase and merge / cherry-pick は使用しないでください。',
+      '- 競合修正は別のマージコミットとし、その名義には実際の解決者（自動処理なら Bot）を使用してください。',
+      '- 本家の作者を競合修正コミットの作者にしたり、所有者の名義を自動で流用したりしないでください。',
+      '- 取り込んだ本家の SHA を git merge-base --is-ancestor <SHA> master で確認してください（終了コード0が成功）。',
     ].join('\n');
     const title = '[upstream-sync] 本家更新の競合・解決待ち';
     if (!queue) {

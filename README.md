@@ -1,6 +1,30 @@
 <div align="center">
+
+# ⚠️ THIS IS NOT THE OFFICIAL RIKKAHUB ⚠️
+
+## UNOFFICIAL FORK — INDEPENDENTLY MAINTAINED
+
+**THIS REPOSITORY IS NOT THE OFFICIAL RIKKAHUB PROJECT.**
+
+This is an independent fork of RikkaHub with custom UI modifications
+and upstream updates.
+
+**We are NOT affiliated with, endorsed by, or officially connected to
+the original RikkaHub developers.**
+
+### 🔗 [Official RikkaHub Repository](https://github.com/rikkahub/rikkahub)
+
+</div>
+
+---
+
+
+
+<div align="center">
   <img src="docs/icon.png" alt="App Icon" width="100" />
   <h1>RikkaHub</h1>
+
+  
 
 A native Android LLM chat client that supports switching between different providers for
 conversations 🤖💬

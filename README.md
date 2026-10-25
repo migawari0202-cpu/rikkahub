@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚠️ THIS IS NOT THE OFFICIAL RIKKAHUB ⚠️
+# 🔴⚠️ THIS IS NOT THE OFFICIAL RIKKAHUB ⚠️🔴
 
 ## UNOFFICIAL FORK — INDEPENDENTLY MAINTAINED
 
@@ -22,9 +22,6 @@ the original RikkaHub developers.**
 
 Changes resulting from pulling from the upstream repository are not recorded.
 See [CHANGELOG.md](CHANGELOG.md) for a record of this fork's changes.
-(small wait sorry)
-
-
 
 <div align="center">
   <img src="docs/icon.png" alt="App Icon" width="100" />

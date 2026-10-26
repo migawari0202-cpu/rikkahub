@@ -114,6 +114,7 @@ class ChatRequestFactory(
                 settings = settings,
                 assistant = assistant,
                 model = model,
+                conversation = conversation,
                 workspaceCwd = conversation.workspaceCwd,
             ),
         )

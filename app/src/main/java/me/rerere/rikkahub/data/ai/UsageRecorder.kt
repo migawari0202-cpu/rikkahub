@@ -28,6 +28,7 @@ enum class UsageSource {
     TRANSLATION,
     MEMORY,
     OCR,
+    DELEGATE_RESEARCH,
 }
 
 /** 记录用量时附带的归属信息 */

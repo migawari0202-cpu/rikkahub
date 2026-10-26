@@ -80,6 +80,8 @@
   <string name="assistant_page_local_tools_javascript_engine_title">JavaScriptエンジン</string>
   <string name="assistant_page_local_tools_time_info_desc">デバイスから現在の日付、曜日、時刻、タイムゾーン情報を取得</string>
   <string name="assistant_page_local_tools_time_info_title">時刻情報</string>
+  <string name="assistant_page_local_tools_delegate_research_title">調査を委任</string>
+  <string name="assistant_page_local_tools_delegate_research_desc">設定した高速モデルで、独立した調査を最大4件並列実行します。高速モデルとWeb検索を設定してください。</string>
   <string name="assistant_page_local_tools_tts_desc">AIが選択したTTSサービスを使ってテキストを読み上げます</string>
   <string name="assistant_page_local_tools_tts_title">テキスト読み上げ</string>
   <string name="assistant_page_manage_memory_title">記憶を管理</string>
@@ -1642,6 +1644,7 @@ mDNSアドレス: .localホスト名を使用し、IPを知らなくても同じ
   <string name="stats_page_source_translation">翻訳</string>
   <string name="stats_page_source_memory">記憶</string>
   <string name="stats_page_source_ocr">OCR</string>
+  <string name="stats_page_source_delegate_research">委任した調査</string>
   <string name="assistant_page_memory_empty">まだ記憶がありません</string>
   <string name="assistant_page_memory_empty_hint">チャット中に伝えた内容をアシスタントが記憶します。+ をタップして追加することもできます</string>
   <string name="assistant_page_memory_empty_disabled_hint">このアシスタントの記憶はオフになっています。オンにすると、伝えた内容を記憶できるようになります</string>

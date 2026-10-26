@@ -80,6 +80,8 @@
   <string name="assistant_page_local_tools_javascript_engine_title">JavaScript Engine</string>
   <string name="assistant_page_local_tools_time_info_desc">Get current date, weekday, time, and timezone info from the device</string>
   <string name="assistant_page_local_tools_time_info_title">Time Info</string>
+  <string name="assistant_page_local_tools_delegate_research_title">Delegate Research</string>
+  <string name="assistant_page_local_tools_delegate_research_desc">Run up to four independent research tasks in parallel using the configured fast model. Configure a fast model and web search for research.</string>
   <string name="assistant_page_local_tools_tts_desc">Let the AI read text aloud to you using your selected TTS service</string>
   <string name="assistant_page_local_tools_tts_title">Text to Speech</string>
   <string name="assistant_page_manage_memory_title">Manage Memory</string>
@@ -1646,6 +1648,7 @@
   <string name="stats_page_source_translation">Translation</string>
   <string name="stats_page_source_memory">Memory</string>
   <string name="stats_page_source_ocr">OCR</string>
+  <string name="stats_page_source_delegate_research">Delegated research</string>
   <string name="image_preview_saving">Saving…</string>
   <string name="image_preview_saved">Image saved</string>
   <string name="setting_provider_page_account">Account</string>

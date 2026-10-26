@@ -83,15 +83,22 @@ jobs:
       - name: Prepare build files
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          KEY_BASE64: ${{ secrets.KEY_BASE64 }}
+          SIGNING_CONFIG: ${{ secrets.SIGNING_CONFIG }}
         run: |
-          # Decode signing keystore and write signing configuration.
-          echo "${{ secrets.KEY_BASE64 }}" | base64 -d > app/app.key
-          echo "${{ secrets.SIGNING_CONFIG }}" > local.properties
+          # Use the owner's release key when available; forks without it build a debug APK.
+          if [ -n "${KEY_BASE64:-}" ] && [ -n "${SIGNING_CONFIG:-}" ]; then
+            printf '%s' "$KEY_BASE64" | base64 --decode > app/app.key
+            printf '%s\n' "$SIGNING_CONFIG" > local.properties
+            echo "BUILD_VARIANT=release" >> "$GITHUB_ENV"
+          else
+            echo "No release signing secrets; building an installable debug APK for this fork."
+            echo "BUILD_VARIANT=debug" >> "$GITHUB_ENV"
+          fi
 
-          # Firebase is optional for forks. If configured, validate and use it;
-          # otherwise skip only the Google Services processing task at build time.
+          # Firebase config is optional for forks. Validate it if provided.
           if [ -z "${GOOGLE_SERVICES_JSON:-}" ]; then
-            echo "No GOOGLE_SERVICES_JSON secret; building this fork without Firebase configuration."
+            echo "No GOOGLE_SERVICES_JSON secret; Firebase services will be unconfigured in this fork build."
             echo "SKIP_GOOGLE_SERVICES=true" >> "$GITHUB_ENV"
           elif printf '%s' "$GOOGLE_SERVICES_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
             printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
@@ -116,10 +123,20 @@ jobs:
       - name: Gradle Build
         run: |
           chmod +x gradlew
-          if [ "${SKIP_GOOGLE_SERVICES:-false}" = "true" ]; then
-            ./gradlew assembleGithubRelease -x :app:processGithubReleaseGoogleServices
+          if [ "${BUILD_VARIANT:-debug}" = "release" ]; then
+            if [ "${SKIP_GOOGLE_SERVICES:-false}" = "true" ]; then
+              ./gradlew assembleGithubRelease -x :app:processGithubReleaseGoogleServices
+            else
+              ./gradlew assembleGithubRelease
+            fi
+            echo "NIGHTLY_APK_GLOB=app/build/outputs/apk/github/release/*.apk" >> "$GITHUB_ENV"
           else
-            ./gradlew assembleGithubRelease
+            if [ "${SKIP_GOOGLE_SERVICES:-false}" = "true" ]; then
+              ./gradlew assembleGithubDebug -x :app:processGithubDebugGoogleServices
+            else
+              ./gradlew assembleGithubDebug
+            fi
+            echo "NIGHTLY_APK_GLOB=app/build/outputs/apk/github/debug/*.apk" >> "$GITHUB_ENV"
           fi
 
       # 把 APK 直接发布为 Prerelease，用户点链接即可下载单个 apk，无需登录、无需解压
@@ -136,5 +153,5 @@ jobs:
             > ⚠️ 开发版本，可能不稳定，仅供测试。
           # mapping.txt 用于还原混淆后的崩溃堆栈，所有 ABI 的 APK 共用这一份
           files: |
-            app/build/outputs/apk/github/release/*.apk
+            ${{ env.NIGHTLY_APK_GLOB }}
             app/build/outputs/mapping/githubRelease/mapping.txt

@@ -84,42 +84,43 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          # 解码base64编码的keystore文件
+          # Decode signing keystore and write signing configuration.
           echo "${{ secrets.KEY_BASE64 }}" | base64 -d > app/app.key
-
-          # 写入签名配置到local.properties
           echo "${{ secrets.SIGNING_CONFIG }}" > local.properties
 
-          # Write Google Services config safely and validate before Gradle runs.
+          # Firebase is optional for forks. If configured, validate and use it;
+          # otherwise skip only the Google Services processing task at build time.
           if [ -z "${GOOGLE_SERVICES_JSON:-}" ]; then
-            echo "::error::GOOGLE_SERVICES_JSON secret is empty. Store the complete google-services.json contents as the secret."
-            exit 1
-          fi
-
-          # Accept either raw JSON or Base64-encoded JSON without exposing the secret in the log.
-          if printf '%s' "$GOOGLE_SERVICES_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
+            echo "No GOOGLE_SERVICES_JSON secret; building this fork without Firebase configuration."
+            echo "SKIP_GOOGLE_SERVICES=true" >> "$GITHUB_ENV"
+          elif printf '%s' "$GOOGLE_SERVICES_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
             printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
           elif printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode 2>/dev/null | jq -e 'type == "object"' >/dev/null 2>&1; then
             printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
           else
-            echo "::error::GOOGLE_SERVICES_JSON must be a JSON object or Base64 of a JSON object. Check the secret value and remove surrounding quotes."
+            echo "::error::GOOGLE_SERVICES_JSON must be raw JSON or Base64-encoded JSON."
             exit 1
           fi
 
-          if ! jq -e '.client | type == "array" and length > 0' app/google-services.json >/dev/null 2>&1; then
-            echo "::error::GOOGLE_SERVICES_JSON is valid JSON but has no Firebase clients. Use the complete Firebase Android configuration."
-            exit 1
-          fi
-
-          if ! jq -e '.client | any(.[]; .client_info.android_client_info.package_name == "me.rerere.rikkahub" or .client_info.android_client_info.package_name == "me.rerere.rikkahub.debug")' app/google-services.json >/dev/null 2>&1; then
-            echo "::error::GOOGLE_SERVICES_JSON has no Android client for me.rerere.rikkahub (or its .debug test variant)."
-            exit 1
+          if [ -f app/google-services.json ]; then
+            if ! jq -e '.client | type == "array" and length > 0' app/google-services.json >/dev/null 2>&1; then
+              echo "::error::GOOGLE_SERVICES_JSON is valid JSON but contains no Firebase clients."
+              exit 1
+            fi
+            if ! jq -e '.client | any(.[]; .client_info.android_client_info.package_name == "me.rerere.rikkahub" or .client_info.android_client_info.package_name == "me.rerere.rikkahub.debug")' app/google-services.json >/dev/null 2>&1; then
+              echo "::error::GOOGLE_SERVICES_JSON has no Android client for this app."
+              exit 1
+            fi
           fi
 
       - name: Gradle Build
         run: |
           chmod +x gradlew
-          ./gradlew assembleGithubRelease
+          if [ "${SKIP_GOOGLE_SERVICES:-false}" = "true" ]; then
+            ./gradlew assembleGithubRelease -x :app:processGithubReleaseGoogleServices
+          else
+            ./gradlew assembleGithubRelease
+          fi
 
       # 把 APK 直接发布为 Prerelease，用户点链接即可下载单个 apk，无需登录、无需解压
       - name: Publish nightly prerelease

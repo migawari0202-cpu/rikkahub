@@ -173,6 +173,12 @@ object ModelRegistry {
         toolReasoningAbility()
     }
 
+    val GEMMA_4 = defineModel {
+        tokens("gemma", "4")
+        visionInput()
+        toolReasoningAbility()
+    }
+
     val GEMINI_FLASH_LATEST = defineModel {
         exact("gemini-flash-latest")
         visionInput()
@@ -649,6 +655,7 @@ object ModelRegistry {
         GEMINI_3_1_FLASH_IMAGE,
         GEMINI_3_5,
         GEMINI_4,
+        GEMMA_4,
         GEMINI_FLASH_LATEST,
         GEMINI_PRO_LATEST,
         CLAUDE_4,

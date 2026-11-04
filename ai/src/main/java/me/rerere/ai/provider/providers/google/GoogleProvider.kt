@@ -383,9 +383,11 @@ class GoogleProvider(private val client: OkHttpClient, context: Context? = null)
 
                     val isGeminiPro =
                         params.model.modelId.contains(Regex("2\\.5.*pro", RegexOption.IGNORE_CASE))
+                    val isGemma = ModelRegistry.GEMMA_4.match(modelId = params.model.modelId)
                     val useThinkingLevel =
                         ModelRegistry.GEMINI_3_SERIES.match(modelId = params.model.modelId) ||
-                            ModelRegistry.GEMINI_4.match(modelId = params.model.modelId)
+                            ModelRegistry.GEMINI_4.match(modelId = params.model.modelId) ||
+                            isGemma
 
                     when (params.reasoningLevel) {
                         ReasoningLevel.AUTO -> {} // 自动模式，不设置参数
@@ -402,9 +404,11 @@ class GoogleProvider(private val client: OkHttpClient, context: Context? = null)
                         else -> {
                             if (useThinkingLevel) {
                                 when (params.reasoningLevel) {
-                                    ReasoningLevel.LOW -> put("thinkingLevel", "low")
-                                    ReasoningLevel.MEDIUM -> put("thinkingLevel", "medium")
-                                    else -> put("thinkingLevel", "high") // HIGH, XHIGH
+                                    // Gemma 的思考只有开/关，thinkingLevel 只接受 minimal / high，
+                                    // 传 low / medium 会报 “Thinking level is not supported”
+                                    ReasoningLevel.LOW -> put("thinkingLevel", if (isGemma) "minimal" else "low")
+                                    ReasoningLevel.MEDIUM -> put("thinkingLevel", if (isGemma) "high" else "medium")
+                                    else -> put("thinkingLevel", "high") // HIGH, XHIGH, MAX
                                 }
                             } else {
                                 put("thinkingBudget", params.reasoningLevel.budgetTokens)

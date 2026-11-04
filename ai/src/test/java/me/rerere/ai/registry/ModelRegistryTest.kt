@@ -54,6 +54,18 @@ class ModelRegistryTest {
     }
 
     @Test
+    fun testGemma4() {
+        val visionInput = listOf(Modality.TEXT, Modality.IMAGE)
+        val toolReasoning = listOf(ModelAbility.TOOL, ModelAbility.REASONING)
+        assertTrue(ModelRegistry.GEMMA_4.match("gemma-4-31b-it"))
+        assertTrue(ModelRegistry.GEMMA_4.match("gemma-4-26b-a4b-it"))
+        assertFalse(ModelRegistry.GEMMA_4.match("gemini-4-pro"))
+        assertFalse(ModelRegistry.GEMMA_4.match("gemma-3-27b-it"))
+        assertEquals(visionInput, ModelRegistry.MODEL_INPUT_MODALITIES.getData("gemma-4-31b-it"))
+        assertEquals(toolReasoning, ModelRegistry.MODEL_ABILITIES.getData("gemma-4-31b-it"))
+    }
+
+    @Test
     fun testClaudeSeries() {
         assertTrue(ModelRegistry.CLAUDE_SERIES.match("claude-sonnet-4.5-20250929"))
         assertTrue(ModelRegistry.CLAUDE_SERIES.match("claude-4.5-sonnet"))

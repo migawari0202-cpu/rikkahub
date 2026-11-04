@@ -110,6 +110,13 @@ class InteractionsApiTest {
         assertEquals("minimal", thinkingLevel("gemini-3-flash-preview", ReasoningLevel.OFF))
         assertEquals("low", thinkingLevel("gemini-2.5-flash", ReasoningLevel.OFF))
         assertEquals("high", thinkingLevel("gemini-2.5-pro", ReasoningLevel.XHIGH))
+
+        // Gemma 只支持 minimal / high，low / medium 会返回 400
+        assertNull(thinkingLevel("gemma-4-31b-it", ReasoningLevel.AUTO))
+        assertEquals("minimal", thinkingLevel("gemma-4-31b-it", ReasoningLevel.OFF))
+        assertEquals("minimal", thinkingLevel("gemma-4-31b-it", ReasoningLevel.LOW))
+        assertEquals("high", thinkingLevel("gemma-4-31b-it", ReasoningLevel.MEDIUM))
+        assertEquals("high", thinkingLevel("gemma-4-31b-it", ReasoningLevel.MAX))
     }
 
     @Test
